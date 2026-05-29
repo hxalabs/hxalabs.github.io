@@ -84,6 +84,33 @@ nav {
 
 .nav-links a:hover { color: var(--obsidian); }
 
+/* Mobile hamburger */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--obsidian);
+  border-radius: 1px;
+  transition: all 0.3s;
+}
+
+.nav-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
 /* Hero */
 .hero {
   padding: 160px 0 100px;
@@ -564,20 +591,80 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .nav-toggle { display: flex; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    background: rgba(240, 235, 227, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-light);
+    padding: 8px 0;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a {
+    display: block;
+    padding: 14px clamp(24px, 4vw, 48px);
+    font-size: 16px;
+  }
+  .nav-links a:active { background: var(--gray-faint); }
+
+  .hero { padding: 110px 0 64px; }
+  .hero p { font-size: 16px; }
+  .hero-buttons { margin-top: 32px; }
+
+  .stats-section,
+  .products-section,
+  .founder-section,
+  .contact-section { padding: 56px 0; }
+
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 40px; }
+  .stat-number { font-size: 28px; }
+
+  .products-grid { grid-template-columns: 1fr; margin-top: 32px; }
+  .product-card { padding: 24px 20px; }
+
+  .pillars-grid { grid-template-columns: 1fr 1fr; }
+
+  .founder-card { margin-top: 32px; }
   .founder-identity { flex-direction: column; gap: 20px; }
   .founder-photo { width: 100px; height: 125px; }
   .founder-story { grid-template-columns: 1fr; gap: 24px; }
-  .founder-top, .founder-bottom { padding: 24px; }
-  .founder-stats { grid-template-columns: repeat(3, 1fr); }
-  .contact-grid { grid-template-columns: 1fr; gap: 40px; }
-  .nav-links { display: none; }
-  .pillars-grid { grid-template-columns: 1fr 1fr; }
+  .founder-top, .founder-bottom { padding: 24px 20px; }
+  .founder-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .founder-stat { padding: 12px 8px; }
+  .founder-stat-value { font-size: 18px; }
+  .founder-stat-label { font-size: 10px; }
+  .founder-quote { font-size: 15px; }
+
+  .quote-section { padding: 64px clamp(24px, 4vw, 48px); }
+
+  .contact-grid { grid-template-columns: 1fr; gap: 32px; }
+
+  .footer-inner { flex-direction: column; text-align: center; gap: 12px; }
 }
 
 @media (max-width: 480px) {
+  .hero { padding: 96px 0 48px; }
+  .hero h1 { font-size: 32px; }
+  .hero-buttons { flex-direction: column; }
+  .hero-buttons .btn { justify-content: center; }
+
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
   .pillars-grid { grid-template-columns: 1fr; }
+
   .founder-stats { grid-template-columns: 1fr; }
+  .founder-name { font-size: 24px; }
+  .founder-meta { font-size: 11px; }
+
+  .section-title { font-size: 26px; }
+  .section-label { font-size: 10px; }
 }
 </style>
 </head>
@@ -586,12 +673,15 @@ footer {
 <nav>
   <div class="nav-inner">
     <div class="logo">HXA Labs</div>
-    <ul class="nav-links">
+    <ul class="nav-links" id="navLinks">
       <li><a href="#products">Products</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#founder">Founder</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
@@ -792,8 +882,23 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', (e) => {
     e.preventDefault();
     const target = document.querySelector(a.getAttribute('href'));
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (target) {
+      const navHeight = 64;
+      const y = target.getBoundingClientRect().top + window.scrollY - navHeight;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+    navLinks.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
   });
+});
+
+const navToggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+navToggle.addEventListener('click', () => {
+  const isOpen = navLinks.classList.toggle('open');
+  navToggle.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', isOpen);
 });
 </script>
 
